@@ -21,12 +21,11 @@ function createRow(tableID, id, args) {
 		if ( key === 'node' ) return
 
 		td.push( document.createElement ('td') );
-		console.log(key);
-
 
 		args.node = document.createElement ('input');
 		args.node.className = 'regular-text';
 		args.node.type = 'text';
+		args.node.name = "wpvarnish_" + key + "[]";
 		args.node.id = id;
 		args.node.value = val || "";
 

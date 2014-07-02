@@ -282,9 +282,16 @@ class WPVarnish {
 		$this->PurgeObject( $archive_day_url . $archive_pattern );
 
 		// Custom Common Objects
-		throw new ErrorException("Error Processing Request", 1);
-		if ( get_option('custom_common_objects') ) {
-			$custom_common_objects = self::cleanURL( home_url( get_option('custom_common_objects') ) );
+		if ( get_option('wpvarnish_regex') ) {
+			$regexes = get_option('wpvarnish_regex');
+			if ( is_array($regexes) ){
+				foreach ($regexes as $regex) {
+					$custom_common_objects_url = self::cleanURL( home_url( $regex ) );
+					trigger_error("check check 1 2", E_USER_ERROR);
+
+					$this->PurgeObject( $custom_common_objects_url );
+				}
+			}
 		}
 
 		do_action_ref_array('wp_varnish_purge_comment_objects', array(&$this, $post_id, $post));
@@ -537,9 +544,9 @@ class WPVarnish {
 						update_option( "wpvarnish_vversion", (int) $_POST["wpvarnish_vversion"] );
 					}
 
-					if ( !empty( $_POST["custom_common_objects"] ) ) {
+					if ( !empty( $_POST["wpvarnish_regex"] ) ) {
 						// self::cleanSubmittedData( 'wpvarnish_port', '/[^0-9]/' );
-						update_option( "custom_common_objects", $_POST["custom_common_objects"] );
+						update_option( "wpvarnish_regex", $_POST["wpvarnish_regex"] );
 					}
 				}
 
@@ -628,7 +635,7 @@ class WPVarnish {
 					</tr>
 					<script>
 						<?php
-							$regexes = get_option( "custom_common_objects" );
+							$regexes = get_option( "wpvarnish_regex" );
 							// echo "rowCount = $i\n";
 							for ( $i = 0; $i < count( $regexes ); $i++ ) {
 								$jsargs = array( 'regex' => $regexes[$i] );
