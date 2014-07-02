@@ -37,7 +37,7 @@ class WPVarnish {
 
 		// Localization init
 		add_action( 'init', array( $this, 'initLocalization' ) );
-		
+
 		// Check user purge
 		add_action( 'init', array( $this, 'checkUserPurgeActions' ) );
 
@@ -130,7 +130,7 @@ class WPVarnish {
 		if ( (get_option( "wpvarnish_vversion" ) == FALSE ) ) {
 			add_option( "wpvarnish_vversion", 2, '', 'yes' );
 		}
-		
+
 		if ( (get_option( "wpvarnish_purge_debug" ) == FALSE ) ) {
 			add_option( "wpvarnish_purge_debug", 0, '', 'yes' );
 		}
@@ -156,14 +156,14 @@ class WPVarnish {
 				$this->PurgePost( (int) $_GET['wpvarnish_post_id'] );
 				$this->PurgeCommonObjects( (int) $_GET['wpvarnish_post_id'] );
 			}
-			
+
 			$destination = wp_get_referer();
 			if ( $destination == false ) {
 				$destination = remove_query_arg('wpvarnish_action');
 				$destination = remove_query_arg('wpvarnish_post_id', $destination);
 				$destination = remove_query_arg('_wpnonce', $destination);
 			}
-			
+
 			wp_redirect( $destination );
 			exit();
 		}
@@ -180,7 +180,7 @@ class WPVarnish {
 
 	/**
 	 * Clear cache using a URL, clear the cache
-	 * 
+	 *
 	 * @param string $wpv_purl
 	 */
 	public function PurgeURL( $wpv_purl ) {
@@ -191,7 +191,7 @@ class WPVarnish {
 
 	/**
 	 * wrapper on PurgeCommonObjects method for transition_post_status hook
-	 * 
+	 *
 	 * @param string $old
 	 * @param string $new
 	 * @param WP_Post $post
@@ -206,7 +206,7 @@ class WPVarnish {
 
 	/**
 	 * Purge related objects
-	 * 
+	 *
 	 * @param integer $post_id
 	 * @return boolean
 	 */
@@ -259,27 +259,33 @@ class WPVarnish {
 				$this->PurgeObject( trailingslashit(self::cleanURL(get_term_link( $term, $term->taxonomy))) . $archive_pattern );
 			}
 		}
-		
+
 		// Author Archive
 		$author_archive_url = self::cleanURL( get_author_posts_url( $post->post_author ) );
 		$this->PurgeObject( $author_archive_url . $archive_pattern );
-		
+
 		// Date based archives
 		$archive_year = mysql2date( 'Y', $post->post_date );
 		$archive_month = mysql2date( 'm', $post->post_date );
 		$archive_day = mysql2date( 'd', $post->post_date );
-		
+
 		// Yearly Archive
 		$archive_year_url = self::cleanURL( get_year_link( $archive_year ) );
 		$this->PurgeObject( $archive_year_url . $archive_pattern );
-		
+
 		// Monthly Archive
 		$archive_month_url = self::cleanURL( get_month_link( $archive_year, $archive_month ) );
 		$this->PurgeObject( $archive_month_url . $archive_pattern );
-		
+
 		// Daily Archive
 		$archive_day_url = self::cleanURL( get_day_link( $archive_year, $archive_month, $archive_day ) );
 		$this->PurgeObject( $archive_day_url . $archive_pattern );
+
+		// Custom Common Objects
+		throw new ErrorException("Error Processing Request", 1);
+		if ( get_option('custom_common_objects') ) {
+			$custom_common_objects = self::cleanURL( home_url( get_option('custom_common_objects') ) );
+		}
 
 		do_action_ref_array('wp_varnish_purge_comment_objects', array(&$this, $post_id, $post));
 
@@ -288,7 +294,7 @@ class WPVarnish {
 
 	/**
 	 * wrapper on PurgePost method for transition_post_status hook
-	 * 
+	 *
 	 * @param string $old
 	 * @param string $new
 	 * @param WP_Post $post
@@ -303,7 +309,7 @@ class WPVarnish {
 
 	/**
 	 * Purges a post object
-	 * 
+	 *
 	 * @param integer $post_id
 	 * @param boolean $purge_comments
 	 * @return boolean
@@ -334,13 +340,13 @@ class WPVarnish {
 		} else {
 			$wpv_url = get_permalink( $post->ID );
 		}
-		
-		
+
+
 		$wpv_url = self::cleanURL( $wpv_url );
-		
+
 		// Purge classic url
 		$this->PurgeObject( $wpv_url );
-		
+
 		// Purge post comments feed and comment pages, if requested, before
 		// adding multipage support.
 		if ( $purge_comments === true ) {
@@ -358,7 +364,7 @@ class WPVarnish {
 		if ( in_array( get_post_type( $post ), array( 'post', 'page' ) ) ) {
 			$wpv_url .= '([\d]+/)?$';
 		}
-		
+
 		// Purge object permalink
 		$this->PurgeObject( $wpv_url );
 
@@ -381,7 +387,7 @@ class WPVarnish {
 
 	/**
 	 * Wrapper on PurgePostComments for comment status changes hook
-	 * 
+	 *
 	 * @param integer $comment_id
 	 * @param string $new_comment_status
 	 */
@@ -391,7 +397,7 @@ class WPVarnish {
 
 	/**
 	 * Purge all comments pages from a post
-	 * 
+	 *
 	 * @param integer $comment_id
 	 */
 	public function PurgePostComments( $comment_id ) {
@@ -415,7 +421,7 @@ class WPVarnish {
 
 	/**
 	 * Get post id for current page
-	 * 
+	 *
 	 * @global array $posts
 	 * @global integer $comment_post_ID
 	 * @global integer $post_ID
@@ -448,7 +454,7 @@ class WPVarnish {
 
 	/**
 	 * Add links for purge cache on WP admin bar
-	 * 
+	 *
 	 * @param WP_Admin_Bar $admin_bar
 	 */
 	public function AdminBarLinks( $admin_bar ) {
@@ -475,7 +481,7 @@ class WPVarnish {
 
 	/**
 	 * Draw the administration interface.
-	 * 
+	 *
 	 * @global array $varnish_servers
 	 */
 	public function drawAdmin() {
@@ -520,7 +526,7 @@ class WPVarnish {
 					} else {
 						update_option( "wpvarnish_use_adminport", 0 );
 					}
-					
+
 					if ( !empty( $_POST["wpvarnish_purge_debug"] ) ) {
 						update_option( "wpvarnish_purge_debug", 1 );
 					} else {
@@ -529,6 +535,11 @@ class WPVarnish {
 
 					if ( !empty( $_POST["wpvarnish_vversion"] ) ) {
 						update_option( "wpvarnish_vversion", (int) $_POST["wpvarnish_vversion"] );
+					}
+
+					if ( !empty( $_POST["custom_common_objects"] ) ) {
+						// self::cleanSubmittedData( 'wpvarnish_port', '/[^0-9]/' );
+						update_option( "custom_common_objects", $_POST["custom_common_objects"] );
 					}
 				}
 
@@ -570,39 +581,83 @@ class WPVarnish {
 		} else {
 			// If not defined in wp-config.php, use individual configuration.
 			?>
-					 <!-- <table class="form-table" id="form-table" width=""> -->
-					<table class="form-table" id="form-table">
-						<tr valign="top">
-							<th scope="row"><?php echo __( "Varnish Administration IP Address", 'wp-varnish' ); ?></th>
-							<th scope="row"><?php echo __( "Varnish Administration Port", 'wp-varnish' ); ?></th>
-							<th scope="row"><?php echo __( "Varnish Secret", 'wp-varnish' ); ?></th>
-						</tr>
-						<script>
-			<?php
-			$addrs = get_option( "wpvarnish_addr" );
-			$ports = get_option( "wpvarnish_port" );
-			$secrets = get_option( "wpvarnish_secret" );
-			//echo "rowCount = $i\n";
-			for ( $i = 0; $i < count( $addrs ); $i++ ) {
-				// let's center the row creation in one spot, in javascript
-				echo "addRow('form-table', $i, '$addrs[$i]', $ports[$i], '$secrets[$i]');\n";
-			}
-			?>
-						</script>
-					</table>
+				<!-- <table class="form-table" id="form-table" width=""> -->
+				<table class="form-table" id="form-table">
+					<tr valign="top">
+						<th scope="row"><?php echo __( "Varnish Administration IP Address", 'wp-varnish' ); ?></th>
+						<th scope="row"><?php echo __( "Varnish Administration Port", 'wp-varnish' ); ?></th>
+						<th scope="row"><?php echo __( "Varnish Secret", 'wp-varnish' ); ?></th>
+					</tr>
+					<script>
+						<?php
+						$addrs = get_option( "wpvarnish_addr" );
+						$ports = get_option( "wpvarnish_port" );
+						$secrets = get_option( "wpvarnish_secret" );
+						//echo "rowCount = $i\n";
+						for ( $i = 0; $i < count( $addrs ); $i++ ) {
+							// let's center the row creation in one spot, in javascript
+							$jsargs = array( 'addr' => $addrs[$i], 'port' => $ports[$i], 'secret' => $secrets[$i] );
+							?>
+							var jsargs = <?php echo json_encode($jsargs); ?>;
+							<?php
+							echo "addRow('form-table', $i, jsargs);\n";
+						}
+						$jsargs = array( 'addr' => '', 'port' => '', 'secret' => '' );
+						?>
+						var jsargs = <?php echo json_encode($jsargs); ?>;
 
-					<br/>
+					</script>
+				</table>
 
-					<table>
-						<tr>
-							<td colspan="3"><input type="button" class="" name="wpvarnish_admin" value="+" onclick="addRow('form-table', rowCount)" /> <?php echo __( "Add one more server", 'wp-varnish' ); ?></td>
-						</tr>
-					</table>
+				<br/>
+
+				<table>
+					<tr>
+						<td colspan="3"><input type="button" class="" name="wpvarnish_admin" value="+" onclick="addRow('form-table', rowCount, jsargs)" /> <?php echo __( "Add one more server", 'wp-varnish' ); ?></td>
+					</tr>
+				</table>
 			<?php
 		}
 		?>
+
+				<!-- CUSTOM COMMON OBJECTS -->
+				<h3><?php echo __( "Custom common objects configuration", 'wp-varnish' ); ?></h3>
+				<table class="custom_common_objects_table" id="custom_common_objects_table">
+					<tr valign="top">
+						<th scope="row"><?php echo __( "URL regex", 'wp-varnish' ); ?></th>
+					</tr>
+					<script>
+						<?php
+							$regexes = get_option( "custom_common_objects" );
+							// echo "rowCount = $i\n";
+							for ( $i = 0; $i < count( $regexes ); $i++ ) {
+								$jsargs = array( 'regex' => $regexes[$i] );
+						?>
+								var jsargs = <?php echo json_encode($jsargs); ?>;
+						<?php
+								// let's center the row creation in one spot, in javascript
+								echo "addRow('custom_common_objects_table', $i, jsargs);\n";
+							}
+
+							$jsargs = array( 'regex' => '' );
+						?>
+
+						var jsargs = <?php echo json_encode($jsargs); ?>;
+					</script>
+				</table>
+
+				<br/>
+
+				<table>
+					<tr>
+						<td colspan="3"><input type="button" class="" name="wpvarnish_admin" value="+" onclick="addRow('custom_common_objects_table', rowCount, jsargs)" /> <?php echo __( "Add one more custom common object", 'wp-varnish' ); ?></td>
+					</tr>
+				</table>
+				<!-- END CUSTOM COMMON OBJECTS -->
+
+
 				<p><?php echo __( "Timeout", 'wp-varnish' ); ?>: <input class="small-text" type="text" name="wpvarnish_timeout" value="<?php echo get_option( "wpvarnish_timeout" ); ?>" /> <?php echo __( "seconds", 'wp-varnish' ); ?></p>
-				
+
 				<p><input type="checkbox" name="wpvarnish_use_adminport" value="1" <?php checked( get_option( "wpvarnish_use_adminport" ), 1 ); ?>/> <?php echo __( "Use admin port instead of PURGE method.", 'wp-varnish' ); ?></p>
 
 				<p><input type="checkbox" name="wpvarnish_purge_debug" value="1" <?php checked( get_option( "wpvarnish_purge_debug" ), 1 ); ?>/> <?php echo __( "Enable log purge Varnish request to a file called debug-varnish.log ", 'wp-varnish' ); ?></p>
@@ -612,7 +667,7 @@ class WPVarnish {
 				<p><input type="checkbox" name="wpvarnish_update_commentnavi" value="1" <?php checked( get_option( "wpvarnish_update_commentnavi" ), 1 ); ?>/> <?php echo __( "Also purge all comment navigation (experimental, use carefully, it will include a bit more load on varnish servers.)", 'wp-varnish' ); ?></p>
 
 				<p>
-		<?php echo __( 'Varnish Version', 'wp-varnish' ); ?>: 
+		<?php echo __( 'Varnish Version', 'wp-varnish' ); ?>:
 					<?php if ( self::isHardcodedVarnishVersion() ) : ?>
 						<code><?php echo self::getVarnishVersion(); ?></code>
 					<?php else: ?>
@@ -631,7 +686,7 @@ class WPVarnish {
 				</p>
 
 				<p class="submit">
-					<input type="submit" class="button-primary" name="wpvarnish_clear_blog_cache" value="<?php echo __( "Purge All Blog Cache", 'wp-varnish' ); ?>" /> 
+					<input type="submit" class="button-primary" name="wpvarnish_clear_blog_cache" value="<?php echo __( "Purge All Blog Cache", 'wp-varnish' ); ?>" />
 		<?php echo __( "Use only if necessary, and carefully as this will include a bit more load on varnish servers.", 'wp-varnish' ); ?>
 				</p>
 			</form>
@@ -641,7 +696,7 @@ class WPVarnish {
 
 	/**
 	 * Takes a location as an argument and purges this object from the varnish cache.
-	 * 
+	 *
 	 * @global array $varnish_servers
 	 * @param string $wpv_url
 	 */
@@ -663,21 +718,21 @@ class WPVarnish {
 
 		$wpv_timeout = get_option( "wpvarnish_timeout" );
 		$wpv_use_adminport = get_option( "wpvarnish_use_adminport" );
-		
+
 		// Get current WP home url
 		$wpv_wpurl = self::getBaseURL();
-		
+
 		// Extract host and address from home URL
 		$wpv_replace_wpurl = '/^https?:\/\/([^\/]+)(.*)/i';
 		$wpv_host = preg_replace( $wpv_replace_wpurl, "$1", $wpv_wpurl );
 		$wpv_blogaddr = preg_replace( $wpv_replace_wpurl, "$2", $wpv_wpurl );
-		
+
 		// Concat start adresse with URL to purge
 		$wpv_url = $wpv_blogaddr . $wpv_url;
-		
+
 		// Start debug_log
 		$debug_log = sprintf( 'wp-varnish log: url = %s ||| host = %s on (', $wpv_url, $wpv_host);
-		
+
 		$j = 0;
 		for ( $i = 0; $i < count( $wpv_purgeaddr ); $i++ ) {
 			$varnish_sock = fsockopen( $wpv_purgeaddr[$i], $wpv_purgeport[$i], $errno, $errstr, $wpv_timeout );
@@ -712,26 +767,26 @@ class WPVarnish {
 			}
 			fwrite( $varnish_sock, $out );
 			fclose( $varnish_sock );
-			
+
 			$j++;
-			
+
 			// Complete debug log
 			$debug_log .= "$wpv_purgeaddr[$i]:$wpv_purgeport[$i], ";
 		}
-		
+
 		// Complete debug log
 		if ( $j == 0 ) {
 			$debug_log .= "no server)";
 		} else {
 			$debug_log = substr($debug_log, 0, -2).')';
 		}
-		
+
 		self::_logVarnish( $debug_log );
 	}
 
 	/**
 	 * Build varnish auth key
-	 * 
+	 *
 	 * @param string $challenge
 	 * @param string $secret
 	 * @return string
@@ -750,12 +805,12 @@ class WPVarnish {
 
 	/**
 	 * Clean data submitted by user, apply a regexp
-	 * 
+	 *
 	 * Helper functions
-	 * FIXME: should do this in the admin console js, not here   
+	 * FIXME: should do this in the admin console js, not here
 	 * normally I hate cleaning data and would rather validate before submit
 	 * but, this fixes the problem in the cleanest method for now
-	 * 
+	 *
 	 * @param string $varname
 	 * @param string $regexp
 	 * @return boolean
@@ -808,7 +863,7 @@ class WPVarnish {
 	 */
 	public static function getBaseURL( $path = '', $original_url = false ) {
 		global $current_site;
-		
+
 		// check for domain mapping plugin by donncha
 		if ( function_exists( 'domain_mapping_siteurl' ) && $original_url == false ) {
 			$base_url = domain_mapping_siteurl( 'NA' );
@@ -823,7 +878,7 @@ class WPVarnish {
 
 		return $base_url;
 	}
-	
+
 	/**
 	 * Log message into debug file if option or constant allow it !
 	 * @param string $message
@@ -833,21 +888,21 @@ class WPVarnish {
 		if ( empty($message) ) {
 			return false;
 		}
-		
+
 		if( (int) get_option( "wpvarnish_purge_debug") == 1 || (defined( 'VARNISH_DEBUG' ) && constant( 'VARNISH_DEBUG' ) == true) ) {
 			error_log( date('Y-m-d G:i:s') . ' - ' . $message . PHP_EOL, 3, WP_CONTENT_DIR . '/debug-varnish.log' );
 			return true;
 		}
-		
+
 		return false;
 	}
-	
+
 	public static function cleanURL( $url ) {
 		$original_url = $url;
 		$url = str_replace( self::getBaseURL(), '', $url );
 		$url = str_replace( self::getBaseURL('', true), '', $url );
 		$url = preg_replace( '#^https?://[^/]+#i', '', $url );
-		
+
 		return apply_filters('wp_varnish_clean_url', $url, $original_url);
 	}
 }

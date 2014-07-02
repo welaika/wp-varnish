@@ -2,34 +2,10 @@
 // so we need a base
 var rowCount = 0;
 
-function createRow(tableID, id, addr, port, secret) {
-	var row = document.createElement ('tr');
-	var td1 = document.createElement ('td');
-	var td2 = document.createElement ('td');
-	var td3 = document.createElement ('td');
-	var td4 = document.createElement ('td');
-	var wpv_addr = document.createElement ('input');
-	var wpv_port = document.createElement ('input');
-	var wpv_secret = document.createElement ('input');
-	var dRow = document.createElement ('input');
-
-	wpv_addr.className = "regular-text";
-	wpv_addr.type = "text";
-	wpv_addr.id = id;
-	wpv_addr.name = "wpvarnish_addr[]";
-	wpv_addr.value = addr || "";
-
-	wpv_port.className = "small-text";
-	wpv_port.type = "text";
-	wpv_port.id = id;
-	wpv_port.name = "wpvarnish_port[]";
-	wpv_port.value = port || "";
-
-	wpv_secret.className = "regular-text";
-	wpv_secret.type = "text";
-	wpv_secret.id = id;
-	wpv_secret.name = "wpvarnish_secret[]";
-	wpv_secret.value = secret || "";
+function createRow(tableID, id, args) {
+	var td = [];
+	var row = document.createElement('tr');
+	var dRow = document.createElement('input');
 
 	dRow.className = "";
 	dRow.type = "button";
@@ -38,23 +14,38 @@ function createRow(tableID, id, addr, port, secret) {
 	dRow.id = id;
 	dRow.onclick = function () { deleteRow(tableID, id); }
 
-	td1.appendChild (wpv_addr);
-	td2.appendChild (wpv_port);
-	td3.appendChild (wpv_secret);
-	td4.appendChild (dRow);
-	row.appendChild (td1);
-	row.appendChild (td2);
-	row.appendChild (td3);
-	row.appendChild (td4);
+	args.node = {};
+
+	var count = 0;
+	jQuery.each( args, function(key, val){
+		if ( key === 'node' ) return
+
+		td.push( document.createElement ('td') );
+		console.log(key);
+
+
+		args.node = document.createElement ('input');
+		args.node.className = 'regular-text';
+		args.node.type = 'text';
+		args.node.id = id;
+		args.node.value = val || "";
+
+		td[count].appendChild(args.node);
+		row.appendChild(td[count]);
+
+		count++;
+	});
+
+	row.appendChild(dRow);
 
 	return row;
 }
 
-function addRow(tableID, id, addr, port, secret) {
+function addRow(tableID, id, args) {
 	var tbody = document.getElementById(tableID).getElementsByTagName ('tbody')[0];
 
 	rowCount++;
-	var row = createRow(tableID, id, addr, port, secret);
+	var row = createRow(tableID, id, args);
 
 	tbody.appendChild (row);
 }
