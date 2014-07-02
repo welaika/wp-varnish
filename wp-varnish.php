@@ -287,8 +287,6 @@ class WPVarnish {
 			if ( is_array($regexes) ){
 				foreach ($regexes as $regex) {
 					$custom_common_objects_url = self::cleanURL( home_url( $regex ) );
-					trigger_error("check check 1 2", E_USER_ERROR);
-
 					$this->PurgeObject( $custom_common_objects_url );
 				}
 			}
