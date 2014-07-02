@@ -14,25 +14,23 @@ function createRow(tableID, id, args) {
 	dRow.id = id;
 	dRow.onclick = function () { deleteRow(tableID, id); }
 
-	args.node = {};
-
-	var count = 0;
-	jQuery.each( args, function(key, val){
-		if ( key === 'node' ) return
+	var args_count = 0;
+	jQuery.each( args, function(key, val){ //Probably would be more coherent a plain js for
+		var node = {};
 
 		td.push( document.createElement ('td') );
 
-		args.node = document.createElement ('input');
-		args.node.className = 'regular-text';
-		args.node.type = 'text';
-		args.node.name = "wpvarnish_" + key + "[]";
-		args.node.id = id;
-		args.node.value = val || "";
+		node = document.createElement ('input');
+		node.className = 'regular-text';
+		node.type = 'text';
+		node.name = "wpvarnish_" + key + "[]";
+		node.id = id;
+		node.value = val || "";
 
-		td[count].appendChild(args.node);
-		row.appendChild(td[count]);
+		td[args_count].appendChild(node);
+		row.appendChild(td[args_count]);
 
-		count++;
+		args_count++;
 	});
 
 	row.appendChild(dRow);
