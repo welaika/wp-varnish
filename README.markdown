@@ -5,8 +5,8 @@ WordPress Varnish
 * Donate link: http://github.com/pkhamre/wp-varnish
 * Tags: cache, caching, performance, varnish, purge, speed
 * Requires at least: 3.4
-* Tested up to: 3.8
-* Stable tag: 0.9.1
+* Tested up to: 3.9.1
+* Stable tag: 0.10.0
 
 WordPress Varnish is a simple plugin that purges new and edited content.
 
@@ -83,10 +83,15 @@ surfer's IP rather than the server's IP.
 Screenshots
 -----------
 
-1. Screenshot of the adminstration interface.
+1. <img src="https://dl.dropboxusercontent.com/u/34358793/WP%20Varnish%20configuration.png" width="400px" />
 
 Changelog
 ---------
+
+### 0.10.0
+* Tagging with [semver](http://semver.org)
+* Add support for custom common objects
+* Code refactoring (more flexible JS functions)
 
 ### 0.9.1
 * Fix purge with WPMS Subdirectory

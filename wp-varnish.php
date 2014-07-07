@@ -2,7 +2,7 @@
 /*
   Plugin Name: WordPress Varnish
   Plugin URI: http://github.com/pkhamre/wp-varnish
-  Version: 0.9.3
+  Version: 0.10.0
   Author: <a href="http://github.com/pkhamre/">Pål-Kristian Hamre</a>
   Description: A plugin for purging Varnish cache when content is published or edited.
 
@@ -627,6 +627,10 @@ class WPVarnish {
 
 				<!-- CUSTOM COMMON OBJECTS -->
 				<h3><?php echo __( "Custom common objects configuration", 'wp-varnish' ); ?></h3>
+				<p>Common objects are those objects purged at every updates, such as feeds, archives and so on.</p>
+				<p>Here you can define extra common Objects, using URL regexes; <strong>escape the forward slash is unnecessary</strong>.<br />
+				Please, keep in mind that using this feature may leads to a very high invalidation rate: use it carefully.<br /> A common use case
+				could be if you generate json queries for your site, so on every updates you probably<br /> want to purge something like <code>/?json=(.*)$</code></p>
 				<table class="custom_common_objects_table" id="custom_common_objects_table">
 					<tr valign="top">
 						<th scope="row"><?php echo __( "URL regex", 'wp-varnish' ); ?></th>
@@ -661,6 +665,7 @@ class WPVarnish {
 				<!-- END CUSTOM COMMON OBJECTS -->
 
 
+				<h3>Miscellaneous</h3>
 				<p><?php echo __( "Timeout", 'wp-varnish' ); ?>: <input class="small-text" type="text" name="wpvarnish_timeout" value="<?php echo get_option( "wpvarnish_timeout" ); ?>" /> <?php echo __( "seconds", 'wp-varnish' ); ?></p>
 
 				<p><input type="checkbox" name="wpvarnish_use_adminport" value="1" <?php checked( get_option( "wpvarnish_use_adminport" ), 1 ); ?>/> <?php echo __( "Use admin port instead of PURGE method.", 'wp-varnish' ); ?></p>
